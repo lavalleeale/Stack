@@ -26,10 +26,12 @@ public class GameManager : MonoBehaviour
     {
         highScore = PlayerPrefs.GetInt("highscore", 0);
         highscoreText.text = $"Highscore: {highScore}";
+        startingHeight = mainCamera.transform.position.y;
     }
 
     public void StartGame()
     {
+        size = 10;
         height = 0;
         foreach (var platform in GameObject.FindGameObjectsWithTag("platform"))
         {
@@ -38,12 +40,11 @@ public class GameManager : MonoBehaviour
         startButton.SetActive(false);
         scoreText.text = $"Score: {height}";
         currentPlatform = GameObject.Find("Platform");
-        startingHeight = mainCamera.transform.position.y;
-        newPlatform();
+        NewPlatform();
         running = true;
     }
 
-    void newPlatform()
+    void NewPlatform()
     {
         lastPlatform = currentPlatform;
         currentPlatform = Instantiate(platformPrefab);
@@ -51,11 +52,11 @@ public class GameManager : MonoBehaviour
         currentPlatform.GetComponent<Renderer>().material.color = Color.HSVToRGB(H: Random.Range(0f, 1f), 0.5f, 1);
         if (Random.Range(0, 2) == 1)
         {
-            currentPlatform.transform.position = new Vector3(x: (float)-currentPlatform.transform.localScale.x, y: height, z: 0);
+            currentPlatform.transform.position = new Vector3(x: lastPlatform.transform.position.x + size, y: height, z: 0);
         }
         else
         {
-            currentPlatform.transform.position = new Vector3(x: currentPlatform.transform.localScale.x, y: height, z: 0);
+            currentPlatform.transform.position = new Vector3(x: lastPlatform.transform.position.x - size, y: height, z: 0);
         }
         height++;
     }
@@ -90,7 +91,7 @@ public class GameManager : MonoBehaviour
             {
                 currentPlatform.transform.position = currentPlatform.transform.position + new Vector3(x: Time.deltaTime * speed, y: 0, z: 0);
             }
-            if (Input.GetButtonDown("Jump"))
+            if (Input.GetKeyDown(KeyCode.Mouse0))
             {
                 GameObject dropper;
                 if (leftDiff > size || rightDiff > size)
@@ -137,7 +138,7 @@ public class GameManager : MonoBehaviour
                 rigid.useGravity = true;
                 rigid.freezeRotation = false;
                 rigid.constraints = new RigidbodyConstraints();
-                newPlatform();
+                NewPlatform();
             }
         }
     }
